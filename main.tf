@@ -3,9 +3,9 @@ provider "aws" {
 }
 
 resource "aws_autoscaling_group" "Task-ASG-graphana-terraform" {
-  desired_capacity     = 2
-  max_size             = 3
-  min_size             = 1
+  desired_capacity     = 5
+  max_size             = 10
+  min_size             = 2
   vpc_zone_identifier  = ["subnet-040215eb6e71489b6"] 
 
   launch_template {
