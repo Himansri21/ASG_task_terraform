@@ -9,7 +9,7 @@ resource "aws_autoscaling_group" "Task-ASG-graphana-terraform" {
   vpc_zone_identifier  = ["subnet-040215eb6e71489b6"] 
 
   launch_template {
-    id      = "lt-09c4bf34fffc56cd8"
+    id      = "lt-00cf5b0aa8be470b6"
     version = "$Latest"
   }
 }
