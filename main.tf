@@ -48,7 +48,7 @@ resource "aws_instance" "grafana_ec2" {
   instance_type          = "t3.micro"
   key_name               = "graphana_key"
   subnet_id              = "subnet-040215eb6e71489b6"
-  vpc_security_group_ids = [aws_security_group.grafana_sg.id]
+  vpc_security_group_ids = [aws_security_group.grafana_sg_terraform.id]
   associate_public_ip_address = true
 
   user_data = <<-EOF
@@ -85,7 +85,7 @@ resource "aws_launch_template" "asg_template" {
 
   network_interfaces {
     associate_public_ip_address = true
-    security_groups             = [aws_security_group.grafana_sg.id]
+    security_groups             = [aws_security_group.grafana_sg_terraform.id]
   }
 
   instance_market_options {
