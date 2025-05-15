@@ -12,7 +12,7 @@ provider "aws" {
 }
 
 # SECURITY GROUP
-resource "aws_security_group" "grafana_sg" {
+resource "aws_security_group" "grafana_sg_terraform" {
   name        = "grafana-sg"
   description = "Allow SSH and Grafana HTTP access"
   vpc_id      = "vpc-0262c7a50445ece52"
@@ -121,7 +121,7 @@ resource "aws_autoscaling_group" "asg" {
 }
 
 # IAM ROLE FOR LAMBDAs
-resource "aws_iam_role" "lambda_exec_role" {
+resource "aws_iam_role" "lambda_exec_role_T" {
   name = "lambda-exec-role"
 
   assume_role_policy = jsonencode({
@@ -135,7 +135,7 @@ resource "aws_iam_role" "lambda_exec_role" {
 }
 
 # IAM POLICY FOR LAMBDAs
-resource "aws_iam_policy" "lambda_policy" {
+resource "aws_iam_policy" "lambda_policy_T" {
   name        = "lambda-asg-policy"
   description = "Allow Lambda to describe ASG and write logs"
 
