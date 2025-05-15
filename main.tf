@@ -44,7 +44,7 @@ resource "aws_security_group" "grafana_sg" {
 
 # EC2 INSTANCE WITH DOCKER COMPOSE GRAFANA
 resource "aws_instance" "grafana_ec2" {
-  ami                    = "ami-08962a4068733a2b6"
+  ami                    = "ami-0faab6bdbac9486fb"
   instance_type          = "t3.micro"
   key_name               = "graphana_key"
   subnet_id              = "subnet-040215eb6e71489b6"
@@ -79,7 +79,7 @@ resource "aws_instance" "grafana_ec2" {
 # LAUNCH TEMPLATE FOR ASG WITH SPOT INSTANCES
 resource "aws_launch_template" "asg_template" {
   name_prefix   = "asg-spot-template-"
-  image_id      = "ami-08962a4068733a2b6"
+  image_id      = "ami-0faab6bdbac9486fb"
   instance_type = "t3.micro"
   key_name      = "graphana_key"
 
