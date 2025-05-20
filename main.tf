@@ -120,6 +120,25 @@ resource "aws_autoscaling_group" "asg" {
   }
 }
 
+resource "aws_autoscaling_group" "asg2" {
+  name                = "grafana-asg2"
+  desired_capacity    = 4
+  max_size            = 8
+  min_size            = 2
+  vpc_zone_identifier = ["subnet-040215eb6e71489b6"]
+
+  launch_template {
+    id      = aws_launch_template.asg_template.id
+    version = "$Latest"
+  }
+
+  tag {
+    key                 = "Name"
+    value               = "asg-instance2"
+    propagate_at_launch = true
+  }
+}
+
 # IAM ROLE FOR LAMBDAs
 resource "aws_iam_role" "lambda_exec_role_T" {
   name = "lambda-exec-role"
