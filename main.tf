@@ -149,7 +149,7 @@ resource "aws_launch_template" "asg_template" {
 # AUTO SCALING GROUP 1
 # --------------------------
 resource "aws_autoscaling_group" "asg" {
-  name                = "grafana-asg"
+  name_prefix         = "grafana-asg"
   desired_capacity    = 2
   max_size            = 4
   min_size            = 1
@@ -171,7 +171,7 @@ resource "aws_autoscaling_group" "asg" {
 # AUTO SCALING GROUP 2
 # --------------------------
 resource "aws_autoscaling_group" "asg2" {
-  name                = "grafana-asg2"
+  name_prefix         = "grafana-asg2"
   desired_capacity    = 4
   max_size            = 8
   min_size            = 2
