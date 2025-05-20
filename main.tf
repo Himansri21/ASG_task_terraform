@@ -11,7 +11,61 @@ provider "aws" {
   region = "eu-central-1"
 }
 
+# --------------------------
+# IAM Role & Policy for EC2 (Grafana access to CloudWatch)
+# --------------------------
+
+resource "aws_iam_role" "grafana_ec2_role" {
+  name = "grafana-ec2-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect = "Allow",
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      },
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_policy" "grafana_cloudwatch_policy" {
+  name        = "grafana-cloudwatch-access"
+  description = "Allow EC2 instance to access CloudWatch metrics and logs"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "cloudwatch:GetMetricData",
+          "cloudwatch:ListMetrics",
+          "logs:DescribeLogGroups",
+          "logs:GetLogEvents",
+          "logs:DescribeLogStreams"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "grafana_role_policy_attachment" {
+  role       = aws_iam_role.grafana_ec2_role.name
+  policy_arn = aws_iam_policy.grafana_cloudwatch_policy.arn
+}
+
+resource "aws_iam_instance_profile" "grafana_instance_profile" {
+  name = "grafana-instance-profile"
+  role = aws_iam_role.grafana_ec2_role.name
+}
+
+# --------------------------
 # SECURITY GROUP
+# --------------------------
+
 resource "aws_security_group" "grafana_sg_terraform" {
   name        = "grafana-sg"
   description = "Allow SSH and Grafana HTTP access"
@@ -42,7 +96,10 @@ resource "aws_security_group" "grafana_sg_terraform" {
   }
 }
 
+# --------------------------
 # EC2 INSTANCE WITH DOCKER COMPOSE GRAFANA
+# --------------------------
+
 resource "aws_instance" "grafana_ec2" {
   ami                    = "ami-0faab6bdbac9486fb"
   instance_type          = "t3.micro"
@@ -50,6 +107,7 @@ resource "aws_instance" "grafana_ec2" {
   subnet_id              = "subnet-040215eb6e71489b6"
   vpc_security_group_ids = [aws_security_group.grafana_sg_terraform.id]
   associate_public_ip_address = true
+  iam_instance_profile   = aws_iam_instance_profile.grafana_instance_profile.name
 
   user_data = <<-EOF
               #!/bin/bash
@@ -76,12 +134,19 @@ resource "aws_instance" "grafana_ec2" {
   }
 }
 
+# --------------------------
 # LAUNCH TEMPLATE FOR ASG WITH SPOT INSTANCES
+# --------------------------
+
 resource "aws_launch_template" "asg_template" {
   name_prefix   = "asg-spot-template-"
   image_id      = "ami-0faab6bdbac9486fb"
   instance_type = "t3.micro"
   key_name      = "graphana_key"
+
+  iam_instance_profile {
+    name = aws_iam_instance_profile.grafana_instance_profile.name
+  }
 
   network_interfaces {
     associate_public_ip_address = true
@@ -100,7 +165,10 @@ resource "aws_launch_template" "asg_template" {
   }
 }
 
-# AUTO SCALING GROUP
+# --------------------------
+# AUTO SCALING GROUPS
+# --------------------------
+
 resource "aws_autoscaling_group" "asg" {
   name                = "grafana-asg"
   desired_capacity    = 2
@@ -139,13 +207,16 @@ resource "aws_autoscaling_group" "asg2" {
   }
 }
 
+# --------------------------
 # IAM ROLE FOR LAMBDAs
+# --------------------------
+
 resource "aws_iam_role" "lambda_exec_role_T" {
   name = "lambda-exec-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
-    Statement = [{
+    Statement = [ {
       Effect    = "Allow",
       Principal = { Service = "lambda.amazonaws.com" },
       Action    = "sts:AssumeRole"
@@ -153,7 +224,10 @@ resource "aws_iam_role" "lambda_exec_role_T" {
   })
 }
 
+# --------------------------
 # IAM POLICY FOR LAMBDAs
+# --------------------------
+
 resource "aws_iam_policy" "lambda_policy_T" {
   name        = "lambda-asg-policy"
   description = "Allow Lambda to describe ASG and write logs"
